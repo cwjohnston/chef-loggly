@@ -23,7 +23,7 @@ include Opscode::Loggly::Input
 
 action :add do
   if device_exists?(new_resource.domain, new_resource.input, new_resource.name)
-    Chef::Log.warn("Loggly/#{new_resource.domain}: Device #{new_resource.name} is already added to input #{new_resource.input}, so I will not attempt to add it again.")
+    Chef::Log.debug("Loggly/#{new_resource.domain}: Device #{new_resource.name} is already added to input #{new_resource.input}, so I will not attempt to add it again.")
   else
     Chef::Log.debug("Loggly/#{new_resource.domain}: Attempting to add device #{new_resource.name} to input #{new_resource.input}...")
     device_id = add_device(new_resource.domain, new_resource.input, new_resource.name)
@@ -48,6 +48,6 @@ action :delete do
       Chef::Log.info("Loggly/#{new_resource.domain}: Successfully deleted device #{new_resource.name} from input #{new_resource.input}.")
     end
   else
-    Chef::Log.warn("Loggly/#{new_resource.domain}: Device #{new_resource.name} does not exist on input #{new_resource.input} so I will not attempt to delete it.")
+    Chef::Log.debug("Loggly/#{new_resource.domain}: Device #{new_resource.name} does not exist on input #{new_resource.input} so I will not attempt to delete it.")
   end
 end

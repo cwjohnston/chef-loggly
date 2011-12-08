@@ -20,7 +20,6 @@
 
 require 'net/http'
 require 'json'
-require 'pp'
 
 module Opscode
   module Loggly
@@ -29,11 +28,14 @@ module Opscode
       # retrieve a list of inputs for the specified domain
       # returns JSON formatted data
       def get_inputs(domain)
+        Chef::Log.debug("Loggly/#{domain}: Retreiving list of inputs...")
         begin
           http = Net::HTTP.new("#{domain}.loggly.com")
           request = Net::HTTP::Get.new("/api/inputs/")
           request.basic_auth node[:loggly][:username], node[:loggly][:password]
           response = http.request(request)
+          Chef::Log.debug("Loggly/#{domain}: Recieved data on the following inputs:")
+          Chef::Log.debug(response.body.inspect)
           return JSON.parse(response.body)
         rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
                Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, JSON::ParserError => e
@@ -56,9 +58,10 @@ module Opscode
       # find the input id of an input in a specified domain given the input name
       # returns the input id
       def find_input_id(domain,input_name)
+        Chef::Log.debug("Loggly/#{domain}: Looking up input id for input #{input_name}...")
         input_id = nil
         get_inputs(domain).each do |input|
-          Chef::Log.debug("Loggly/#{domain}: Processing input #{input["name"]}")
+          Chef::Log.debug("Loggly/#{domain}: Processing input #{input["name"]}...")
           if input["name"] == input_name
             input_id = input["id"]
             Chef::Log.debug("Loggly/#{domain}: Resolved input #{input_name} to input id #{input_id}.")
@@ -82,9 +85,7 @@ module Opscode
       # returns hash containing resulting input id and port number
       def create_input(domain,input_name,service_type,service_description) 
         new_input = { "id" => nil, "port" => nil }
-
         Chef::Log.debug("Loggly/#{domain}: Attempting to create input #{input_name} of type #{service_type}...")
-       
         begin
           http = Net::HTTP.new("#{domain}.loggly.com")
           request = Net::HTTP::Post.new("/api/inputs/")
@@ -112,15 +113,15 @@ module Opscode
         input_id = nil
         if input_exists?(domain,input_name)
           input_id = find_input_id(domain,input_name)
-          Chef::Log.debug("Loggly/#{domain}: Found input id #{input_id} for input #{input_name}")
-          Chef::Log.debug("Loggly/#{domain}: Attempting to delete input #{input_name}")
+          Chef::Log.debug("Loggly/#{domain}: Found input id #{input_id} for input #{input_name}.")
+          Chef::Log.debug("Loggly/#{domain}: Attempting to delete input #{input_name}...")
           begin
             http = Net::HTTP.new("#{domain}.loggly.com")
             request = Net::HTTP::Delete.new("/api/inputs/#{input_id}")
             request.basic_auth node[:loggly][:username], node[:loggly][:password]
             response = http.request(request)
             if response.code == '204'
-              Chef::Log.info("Loggly/#{domain}: Deleted input #{input_name}")
+              Chef::Log.info("Loggly/#{domain}: Deleted input #{input_name}.")
               success = true
             end
             return success
@@ -129,7 +130,7 @@ module Opscode
             Chef::Log.error("Loggly/#{domain}: Error deleting input #{input_name}: #{e}")
           end
         else
-          Chef::Log.warn("Loggly/#{domain}: Could not find input #{input_name} so I won't try to delete it")
+          Chef::Log.debug("Loggly/#{domain}: Could not find input #{input_name} so I won't try to delete it.")
         end
       end
 

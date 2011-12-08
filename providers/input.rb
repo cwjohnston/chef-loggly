@@ -31,7 +31,7 @@ action :create do
       Chef::Log.error("Loggly/#{new_resource.domain}: Attempted creation of input #{new_resource.name}, type #{new_resource.type} did not result in an error, but the new input does not seem to exist either.")
     end
   else
-    Chef::Log.warn("Loggly/#{new_resource.domain}: Input #{new_resource.name} already exists, so I will not try to create it.")
+    Chef::Log.debug("Loggly/#{new_resource.domain}: Input #{new_resource.name} already exists, so I will not try to create it.")
   end
 end
 
@@ -43,10 +43,8 @@ action :delete do
     Chef::Log.debug("Loggly/#{new_resource.domain}: Verifying that input #{new_resource.name} was deleted successfully...")
     if input_exists?(new_resource.domain, new_resource.name)
        Chef::Log.error("Loggly/#{new_resource.domain}: Attempted deletion of input #{new_resource.name}, type #{new_resource.type}, did not result in an error, but the input still seems to exist.")
-    else
-      Chef::Log.info("Loggly/#{new_resource.domain}: Deleted input #{new_resource.name} of type #{new_resource.type}.")
     end
   else
-    Chef::Log.warn("Loggly/#{new_resource.domain}: Input #{new_resource.name} of type #{new_resource.type} does not exist, so I will not try to delete it.")
+    Chef::Log.debug("Loggly/#{new_resource.domain}: Input #{new_resource.name} of type #{new_resource.type} does not exist, so I will not try to delete it.")
   end
 end

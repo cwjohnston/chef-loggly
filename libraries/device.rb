@@ -37,7 +37,7 @@ module Opscode
             if response.has_key?("devices")
               devices = response["devices"]
               Chef::Log.debug("Loggly/#{domain}: Parsed the following device ids from input #{input_name}:")
-              Chef::Log.debug(pp(devices))
+              Chef::Log.debug(devices.inspect)
             end
             return devices
           rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
@@ -85,12 +85,17 @@ module Opscode
       def add_device(domain,input_name,device_ip)
         input_id = find_input_id(domain,input_name)
         begin
+          Chef::Log.debug("Loggly/#{domain}: Attempting to add device #{device_ip} to input #{input_name}...")
           http = Net::HTTP.new("#{domain}.loggly.com")
           request = Net::HTTP::Post.new("/api/devices/")
           request.set_form_data({'input_id' => input_id, 'ip' => device_ip})
           request.set_content_type("text/plain")
           request.basic_auth node[:loggly][:username], node[:loggly][:password]
           response = JSON.parse(http.request(request).body)
+          Chef::Log.debug("Loggly/#{domain}: Received response code #{request.code}.")
+          unless response["id"].nil?
+            Chef::Log.info("Loggly/#{domain}: Added device #{device_ip} on input #{input_name} as device id #{response["id"]}.")
+          end
           return response["id"]
         rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
           Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError, JSON::ParserError => e
