@@ -91,10 +91,11 @@ module Opscode
           request.set_form_data({'input_id' => input_id, 'ip' => device_ip})
           request.set_content_type("text/plain")
           request.basic_auth node[:loggly][:username], node[:loggly][:password]
-          response = JSON.parse(http.request(request).body)
-          Chef::Log.debug("Loggly/#{domain}: Received response code #{request.code}.")
+          response = http.request(request)
+          parsed_response = JSON.parse(http.request(request).body)
+          Chef::Log.debug("Loggly/#{domain}: Received response code #{response.code}.")
           unless response["id"].nil?
-            Chef::Log.info("Loggly/#{domain}: Added device #{device_ip} on input #{input_name} as device id #{response["id"]}.")
+            Chef::Log.info("Loggly/#{domain}: Added device #{device_ip} on input #{input_name} as device id #{parsed_response["id"]}.")
           end
           return response["id"]
         rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
