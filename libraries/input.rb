@@ -83,14 +83,14 @@ module Opscode
  
       # create a new input of specified name and type
       # returns hash containing resulting input id and port number
-      def create_input(domain,input_name,service_type,service_description) 
+      def create_input(domain,input_name,service_type,service_description,format) 
         new_input = { "id" => nil, "port" => nil }
         Chef::Log.debug("Loggly/#{domain}: Attempting to create input #{input_name} of type #{service_type}...")
         begin
           http = Net::HTTP.new("#{domain}.loggly.com")
           request = Net::HTTP::Post.new("/api/inputs/")
           request.basic_auth node[:loggly][:username], node[:loggly][:password]
-          request.set_form_data({'name' => input_name, 'service' => service_type, 'description' => service_description})
+          request.set_form_data({'name' => input_name, 'service' => service_type, 'description' => service_description, 'format' => format})
           request.set_content_type("text/plain")
           response = JSON.parse(http.request(request).body)
           unless response["id"] == nil
