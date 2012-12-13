@@ -22,11 +22,11 @@ include Opscode::Loggly::Input
 
 action :create do
   unless input_exists?(new_resource.domain, new_resource.name)
-    create_input(new_resource.domain, new_resource.name, new_resource.type, new_resource.description)
+    create_input(new_resource.domain, new_resource.name, new_resource.type, new_resource.description, new_resource.format)
     sleep(rand(5))
     Chef::Log.debug("Loggly/#{new_resource.domain}: Verifying that input #{new_resource.name} was created successfully...") 
     if input_exists?(new_resource.domain, new_resource.name)
-      Chef::Log.info("Loggly/#{new_resource.domain}: Created input #{new_resource.name} of type #{new_resource.type}.")
+      Chef::Log.info("Loggly/#{new_resource.domain}: Created input #{new_resource.name} of type #{new_resource.type} and format #{new_resource.format}.")
     else
       Chef::Log.error("Loggly/#{new_resource.domain}: Attempted creation of input #{new_resource.name}, type #{new_resource.type} did not result in an error, but the new input does not seem to exist either.")
     end

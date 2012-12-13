@@ -33,6 +33,7 @@ Example:
         domain node[:loggly][:domain]
         type "syslogtcp"
         description "syslog messages from production nodes"
+        format "json"
         action :create
     end
 
